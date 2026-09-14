@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const TaskTimer = () => {
+export const TaskTimer = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] =
     useState(false);
@@ -17,7 +17,7 @@ const TaskTimer = () => {
     <>
       <div>{`Time ${time}`}</div>
       <button
-        onClick={() => setIsRunning(!isRunning)}
+        onClick={() => setIsRunning((v) => !v)}
       >
         {isRunning ? "Pause" : "Start"}
       </button>
@@ -32,5 +32,3 @@ const TaskTimer = () => {
     </>
   );
 };
-
-export default TaskTimer;
