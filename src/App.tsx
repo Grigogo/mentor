@@ -7,10 +7,12 @@ import {
 import "./App.css";
 import { RefsPage } from "./pages/RefsPage";
 import { EffectsPage } from "./pages/EffectsPage";
+import { RimPage } from "./pages/RimPage";
 
 const TOPICS = [
   { to: "/refs", label: "Refs" },
   { to: "/effects", label: "Effects" },
+  { to: "/rim", label: "Rick and Morty" },
 ];
 
 function App() {
@@ -38,6 +40,10 @@ function App() {
         <Route
           path="/effects"
           element={<EffectsPage />}
+        />
+        <Route
+          path="/rim"
+          element={<RimPage />}
         />
         <Route
           path="*"

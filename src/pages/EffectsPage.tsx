@@ -1,4 +1,4 @@
-import TaskTimer from "../components/effects/TaskTimer";
+import { TaskTimer } from "../components/effects/TaskTimer";
 import { TaskTitle } from "../components/effects/TaskTitle";
 import { TaskCard } from "../components/TaskCard";
 
