@@ -10,6 +10,7 @@ import type {
 import styles from "./RimMain.module.scss";
 import { Card } from "./Card";
 import { Pagination } from "./Pagination";
+import { useDebounce } from "../../hooks/useDebounce";
 
 const API_URL =
   "https://rickandmortyapi.com/api/character/?";
@@ -72,15 +73,24 @@ const RimMain = () => {
     }
   };
 
+  const debouncedSearch = useDebounce(
+    search,
+    500,
+  );
+
   useEffect(() => {
     const controller = new AbortController();
 
-    fetchData(search, page, controller.signal);
+    fetchData(
+      debouncedSearch,
+      page,
+      controller.signal,
+    );
 
     return () => {
       controller.abort();
     };
-  }, [search, page]);
+  }, [debouncedSearch, page]);
 
   return (
     <div>
