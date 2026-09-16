@@ -27,9 +27,8 @@ const RimMain = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] =
     useState<Status>("");
-  const [activeCard, setActiveCard] = useState(
-    {},
-  );
+  const [activeCardId, setActiveCardId] =
+    useState({});
   const [page, setPage] = useState(1);
   const [data, setData] =
     useState<DataRim>(EMPTY_DATA);
@@ -38,6 +37,7 @@ const RimMain = () => {
   const fetchData = async (
     search: string,
     page: number,
+    signal: AbortSignal,
   ) => {
     setStatus("load");
     const params = new URLSearchParams({
@@ -47,34 +47,39 @@ const RimMain = () => {
     try {
       const response = await fetch(
         `${API_URL}${params}`,
+        { signal },
       );
       if (response.status === 404) {
         setStatus("notFound");
-        return EMPTY_DATA;
+        setData(EMPTY_DATA);
+        return;
       }
       if (!response.ok) {
         setStatus("error");
-        return EMPTY_DATA;
+        setData(EMPTY_DATA);
+        return;
       }
       const json = await response.json();
+      setData(json);
       setStatus("ready");
-      return json;
     } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === "AbortError") return;
+      }
       setStatus("error");
       console.error(error);
-      return EMPTY_DATA;
+      setData(EMPTY_DATA);
     }
   };
 
   useEffect(() => {
-    const getData = async () => {
-      const fetchedData = await fetchData(
-        search,
-        page,
-      );
-      setData(fetchedData);
+    const controller = new AbortController();
+
+    fetchData(search, page, controller.signal);
+
+    return () => {
+      controller.abort();
     };
-    getData();
   }, [search, page]);
 
   return (
@@ -114,7 +119,7 @@ const RimMain = () => {
               "[data-character-id]",
             );
           if (
-            !(event.target instanceof HTMLElement)
+            !(currentCard instanceof HTMLElement)
           )
             return;
           const id = Number(
@@ -128,13 +133,14 @@ const RimMain = () => {
         ))}
       </div>
 
-      {status !== "notFound" && (
-        <Pagination
-          info={data.info}
-          currentPage={page}
-          setPageFn={setPage}
-        />
-      )}
+      {status !== "notFound" &&
+        status !== "error" && (
+          <Pagination
+            info={data.info}
+            currentPage={page}
+            setPageFn={setPage}
+          />
+        )}
     </div>
   );
 };
