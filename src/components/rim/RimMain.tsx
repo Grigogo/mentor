@@ -11,6 +11,7 @@ import styles from "./RimMain.module.scss";
 import { Card } from "./Card";
 import { Pagination } from "./Pagination";
 import { useDebounce } from "../../hooks/useDebounce";
+import { JSONData } from "./JSONData";
 
 const API_URL =
   "https://rickandmortyapi.com/api/character/?";
@@ -29,11 +30,27 @@ const RimMain = () => {
   const [status, setStatus] =
     useState<Status>("");
   const [activeCardId, setActiveCardId] =
-    useState({});
+    useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [data, setData] =
     useState<DataRim>(EMPTY_DATA);
   const ref = useRef<HTMLInputElement>(null);
+
+  const onCardClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+  ) => {
+    if (!(event.target instanceof Element))
+      return;
+    const currentCard = event.target.closest(
+      "[data-character-id]",
+    );
+    if (!(currentCard instanceof HTMLElement))
+      return;
+    const id = Number(
+      currentCard.dataset.characterId,
+    );
+    setActiveCardId(id);
+  };
 
   const fetchData = async (
     search: string,
@@ -76,6 +93,10 @@ const RimMain = () => {
   const debouncedSearch = useDebounce(
     search,
     500,
+  );
+
+  const character = data.results.find(
+    (item) => item.id === activeCardId,
   );
 
   useEffect(() => {
@@ -121,28 +142,16 @@ const RimMain = () => {
       )}
       <div
         className={styles.cards}
-        onClick={(event) => {
-          if (!(event.target instanceof Element))
-            return;
-          const currentCard =
-            event.target.closest(
-              "[data-character-id]",
-            );
-          if (
-            !(currentCard instanceof HTMLElement)
-          )
-            return;
-          const id = Number(
-            currentCard?.dataset.userId,
-          );
-          console.log(id);
-        }}
+        onClick={onCardClick}
       >
         {data.results?.map((item) => (
           <Card key={item.id} {...item} />
         ))}
       </div>
 
+      {character && (
+        <JSONData character={character} />
+      )}
       {status !== "notFound" &&
         status !== "error" && (
           <Pagination
